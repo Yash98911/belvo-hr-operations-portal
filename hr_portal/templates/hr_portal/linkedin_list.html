@@ -1,0 +1,30 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}LinkedIn checks{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">INTERN CHECKS · MANUAL REVIEW ONLY</div><h1>LinkedIn checks</h1><p class="muted">Record manual profile reviews. This tracker does not scrape or access LinkedIn automatically.</p></div>
+    <a class="button button-primary" href="{% url 'linkedin-create' %}"><span aria-hidden="true">＋</span> Add profile</a>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, department or reviewer" aria-label="Search LinkedIn checks"></div>
+        <select name="status" class="filter-select" aria-label="Filter by check status"><option value="">All check statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'linkedin-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>INTERN</th><th>DEPARTMENT</th><th>PROFILE</th><th>REVIEWER</th><th>CHECK</th><th>PROFILE STATUS</th><th>LAST CHECKED</th><th>NEXT CHECK</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ record.person.full_name|first|upper }}</span><span><strong>{{ record.person.full_name }}</strong><small>{{ record.feedback_action_required|default:"No follow-up notes" }}</small></span></div></td>
+        <td>{{ record.department }}</td>
+        <td><a class="row-action-link" href="{{ record.profile_url }}" target="_blank" rel="noopener noreferrer">Open profile ↗</a></td>
+        <td>{{ record.assigned_reviewer|default:"—" }}</td>
+        <td><span class="status-chip status-{{ record.check_status }}">{{ record.get_check_status_display }}</span></td>
+        <td>{{ record.get_profile_status_display }}</td><td>{{ record.last_checked_date|date:"d M Y"|default:"—" }}</td>
+        <td>{% if record.next_check_date %}{% if record.next_check_date < today and record.check_status != "done" %}<span class="overdue-date">Overdue · {{ record.next_check_date|date:"d M Y" }}</span>{% else %}{{ record.next_check_date|date:"d M Y" }}{% endif %}{% else %}—{% endif %}</td>
+        <td><a class="row-action-link" href="{% url 'linkedin-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="9"><div class="table-empty"><span class="empty-icon">in</span><strong>No profiles registered yet</strong><p>Add a profile to plan and record manual checks.</p><a class="button button-primary button-small" href="{% url 'linkedin-create' %}">Add profile</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Offboarding{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">PEOPLE OPERATIONS</div><h1>Offboarding</h1><p class="muted">Track exit handovers, due dates and HR follow-ups in one place.</p></div>
+    <div class="heading-actions"><a class="button button-quiet" href="{% url 'offboarding-export' %}"><span aria-hidden="true">↓</span> Export CSV</a><a class="button button-primary" href="{% url 'offboarding-create' %}"><span aria-hidden="true">＋</span> New offboarding</a></div>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, department or HR owner" aria-label="Search offboarding records"></div>
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'offboarding-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PERSON</th><th>DEPARTMENT</th><th>LAST WORKING DAY</th><th>HR OWNER</th><th>STATUS</th><th>CHECKLIST</th><th>DUE DATE</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-peach">{{ record.person.full_name|first|upper }}</span><span><strong>{{ record.person.full_name }}</strong><small>{{ record.reason_category|default:"No category" }}</small></span></div></td>
+        <td>{{ record.department }}</td><td>{{ record.last_working_date|date:"d M Y" }}</td><td>{{ record.hr_owner|default:"—" }}</td>
+        <td><span class="status-chip status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+        <td>{{ record.checklist_completed_count }}/7 complete</td>
+        <td>{% if record.due_date %}{% if record.due_date < today and record.status != "completed" %}<span class="overdue-date">Overdue · {{ record.due_date|date:"d M Y" }}</span>{% else %}{{ record.due_date|date:"d M Y" }}{% endif %}{% else %}—{% endif %}</td>
+        <td><a class="row-action-link" href="{% url 'offboarding-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8"><div class="table-empty"><span class="empty-icon">↙</span><strong>No offboarding records yet</strong><p>Create an exit record to track its handover and follow-ups.</p><a class="button button-primary button-small" href="{% url 'offboarding-create' %}">New offboarding</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

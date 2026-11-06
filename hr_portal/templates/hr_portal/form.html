@@ -1,0 +1,94 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading form-heading">
+    <div><a class="back-link" href="{% url back_url %}">← Back to tracker</a><h1>{{ title }}</h1><p class="muted">Enter the HR record details below. Fields marked with * are required.</p></div>
+</div>
+<form method="post" class="record-form">
+    {% csrf_token %}
+    {% if person_form %}
+    <section class="form-section">
+        <div class="form-section-heading"><span class="section-number">01</span><div><h2>Person details</h2><p>Basic team member and joining information.</p></div></div>
+        <div class="form-grid">
+            {% for field in person_form %}
+            <div class="field-wrap {% if field.name == 'notes' %}field-full{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark">*</span>{% endif %}</label>
+                {{ field }}
+                {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if person_form.non_field_errors %}<div class="field-error">{{ person_form.non_field_errors }}</div>{% endif %}
+    </section>
+    <section class="form-section">
+        <div class="form-section-heading"><span class="section-number">02</span><div><h2>Onboarding progress</h2><p>Assign an owner, set a target date and complete the checklist.</p></div></div>
+        <div class="form-grid">
+            {% for field in onboarding_form %}
+            <div class="field-wrap {% if field.name == 'notes' %}field-full{% elif field.field.widget.input_type == 'checkbox' %}field-checkbox{% endif %}">
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <label class="checkbox-label" for="{{ field.id_for_label }}">{{ field }}<span>{{ field.label }}</span></label>
+                {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark">*</span>{% endif %}</label>
+                    {{ field }}
+                {% endif %}
+                {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if onboarding_form.non_field_errors %}<div class="field-error">{{ onboarding_form.non_field_errors }}</div>{% endif %}
+    </section>
+    {% elif offboarding_form %}
+    <section class="form-section">
+        <div class="form-section-heading"><span class="section-number">01</span><div><h2>Exit details</h2><p>Record the departure date, department and responsible HR owner.</p></div></div>
+        <div class="form-grid">
+            {% for field in form %}
+                {% if field.name == "person" or field.name == "department" or field.name == "last_working_date" or field.name == "reason_category" or field.name == "hr_owner" or field.name == "status" or field.name == "due_date" %}
+                <div class="field-wrap">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark">*</span>{% endif %}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    <section class="form-section">
+        <div class="form-section-heading"><span class="section-number">02</span><div><h2>Exit checklist</h2><p>Confirm each handover step. Do not disable third-party accounts from this tracker.</p></div></div>
+        <div class="form-grid">
+            {% for field in form %}
+                {% if field.field.widget.input_type == "checkbox" %}
+                <div class="field-wrap field-checkbox">
+                    <label class="checkbox-label" for="{{ field.id_for_label }}">{{ field }}<span>{{ field.label }}</span></label>
+                    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                {% elif field.name == "notes" %}
+                <div class="field-wrap field-full">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <small class="field-help">Do not include passwords, bank details, or identity-document numbers.</small>
+                    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <section class="form-section">
+        <div class="form-section-heading"><span class="section-number">01</span><div><h2>Record details</h2><p>Enter the information for this HR register.</p></div></div>
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="field-wrap {% if field.name == 'remarks' or field.name == 'notes' or field.name == 'agenda' or field.name == 'description' or field.name == 'meeting_notes' or field.name == 'follow_up_notes' or field.name == 'completion_notes' or field.name == 'attendees' or field.name == 'participation_notes' %}field-full{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark">*</span>{% endif %}</label>
+                {{ field }}
+                {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    </section>
+    {% endif %}
+    <div class="form-actions"><a class="button button-quiet" href="{% url back_url %}">Cancel</a><button type="submit" class="button button-primary">{{ save_label }} <span aria-hidden="true">→</span></button></div>
+</form>
+{% endblock %}

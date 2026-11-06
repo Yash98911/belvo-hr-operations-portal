@@ -1,0 +1,46 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}{{ meeting.department }} meeting{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><a class="back-link" href="{% url 'meeting-list' %}">← Back to meetings</a><h1>{{ meeting.department }} meeting</h1><p class="muted">{{ meeting.date|date:"l, d F Y" }} · {{ meeting.time|time:"H:i" }} · Hosted by {{ meeting.host }}</p></div>
+    <div class="heading-actions"><a class="button button-quiet" href="{% url 'meeting-edit' meeting.pk %}">Edit meeting</a>{% if meeting.meeting_link %}<a class="button button-primary" href="{{ meeting.meeting_link }}" target="_blank" rel="noopener noreferrer">Open meeting link ↗</a>{% endif %}</div>
+</div>
+<div class="detail-grid">
+    <section class="panel detail-panel">
+        <div class="panel-heading"><div><div class="eyebrow">MEETING NOTES</div><h2>Agenda &amp; discussion</h2></div></div>
+        <div class="detail-body">
+            <div class="detail-block"><span class="detail-label">ATTENDEES</span><p>{{ meeting.attendees|default:"No attendees listed"|linebreaksbr }}</p></div>
+            <div class="detail-block"><span class="detail-label">AGENDA</span><p>{{ meeting.agenda|default:"No agenda added yet."|linebreaksbr }}</p></div>
+            <div class="detail-block"><span class="detail-label">MEETING NOTES</span><p>{{ meeting.meeting_notes|default:"No meeting notes yet."|linebreaksbr }}</p></div>
+            {% if meeting.participation_notes %}<div class="detail-block"><span class="detail-label">PARTICIPATION</span><p>{{ meeting.participation_notes|linebreaksbr }}</p></div>{% endif %}
+            {% if meeting.meeting_location %}<div class="detail-block"><span class="detail-label">LOCATION</span><p>{{ meeting.meeting_location }}</p></div>{% endif %}
+        </div>
+    </section>
+    <section class="panel detail-panel">
+        <div class="panel-heading"><div><div class="eyebrow">FOLLOW-UP</div><h2>Action items</h2></div></div>
+        <div class="action-list action-list-padded">
+            {% for action in action_items %}
+            <div class="action-row">
+                <span class="action-copy"><strong>{{ action.action_item }}</strong><small>{{ action.owner }} · {% if action.due_date %}Due {{ action.due_date|date:"d M Y" }}{% else %}No due date{% endif %}</small></span>
+                <span class="status-chip status-{{ action.status }}">{{ action.get_status_display }}</span>
+                <a class="row-action-link" href="{% url 'meeting-action-edit' meeting.pk action.pk %}">Edit</a>
+            </div>
+            {% empty %}<div class="empty-state compact-empty"><span class="empty-icon">✓</span><strong>No action items yet</strong><p>Add an owner and due date for each follow-up.</p></div>{% endfor %}
+        </div>
+        <div class="inline-form-wrap">
+            <h3>Add an action item</h3>
+            <form method="post" class="inline-form">
+                {% csrf_token %}
+                {% for field in action_form %}
+                <div class="field-wrap">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark">*</span>{% endif %}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                {% endfor %}
+                <button class="button button-primary" type="submit">Add action item</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

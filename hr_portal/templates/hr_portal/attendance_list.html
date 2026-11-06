@@ -1,0 +1,27 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">TRACKERS</div><h1>Attendance</h1><p class="muted">Daily attendance and exceptions, recorded by HR.</p></div>
+    <div class="heading-actions"><a class="button button-quiet" href="{% url 'attendance-export' %}"><span aria-hidden="true">↓</span> Export CSV</a><a class="button button-primary" href="{% url 'attendance-create' %}"><span aria-hidden="true">＋</span> Add attendance</a></div>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, department or note" aria-label="Search attendance"></div>
+        <input type="month" name="month" value="{{ month }}" class="filter-select month-filter" aria-label="Filter by month">
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status or month %}<a class="clear-filter" href="{% url 'attendance-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PERSON</th><th>DEPARTMENT</th><th>DATE</th><th>STATUS</th><th>CHECK-IN</th><th>CHECK-OUT</th><th>ARRANGEMENT</th><th>UPDATED BY</th><th></th></tr></thead>
+    <tbody>{% for entry in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ entry.person.full_name|first|upper }}</span><span><strong>{{ entry.person.full_name }}</strong><small>{{ entry.remarks|default:"No remarks" }}</small></span></div></td>
+        <td>{{ entry.department }}</td><td>{{ entry.date|date:"d M Y" }}</td><td><span class="status-chip status-{{ entry.status }}">{{ entry.get_status_display }}</span></td>
+        <td>{{ entry.check_in|time:"H:i"|default:"—" }}</td><td>{{ entry.check_out|time:"H:i"|default:"—" }}</td><td>{{ entry.get_arrangement_display|default:"—" }}</td><td>{{ entry.updated_by.get_username }}</td>
+        <td><a class="row-action-link" href="{% url 'attendance-edit' entry.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="9"><div class="table-empty"><span class="empty-icon">✓</span><strong>No attendance entries yet</strong><p>Start recording the team’s daily attendance.</p><a class="button button-primary button-small" href="{% url 'attendance-create' %}">Add attendance</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

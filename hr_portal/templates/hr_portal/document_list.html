@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Employee documents{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">HR RECORDS · PRIVATE DRIVE LINKS</div><h1>Employee documents</h1><p class="muted">Track HR-approved documents stored in your existing Google Drive.</p></div>
+    <a class="button button-primary" href="{% url 'document-create' %}"><span aria-hidden="true">＋</span> Add document</a>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, department or category" aria-label="Search employee documents"></div>
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'document-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PERSON</th><th>DEPARTMENT</th><th>CATEGORY</th><th>STATUS</th><th>RECEIVED</th><th>REVIEW DATE</th><th>DRIVE</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar">{{ record.person.full_name|first|upper }}</span><span><strong>{{ record.person.full_name }}</strong><small>{{ record.remarks|default:"No remarks" }}</small></span></div></td>
+        <td>{{ record.department }}</td><td>{{ record.get_category_display }}</td>
+        <td><span class="status-chip status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+        <td>{{ record.date_received|date:"d M Y"|default:"—" }}</td><td>{{ record.review_date|date:"d M Y"|default:"—" }}</td>
+        <td>{% if record.drive_link %}<a class="row-action-link" href="{{ record.drive_link }}" target="_blank" rel="noopener noreferrer">Open Drive ↗</a>{% else %}<span class="muted">No link</span>{% endif %}</td>
+        <td><a class="row-action-link" href="{% url 'document-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8"><div class="table-empty"><span class="empty-icon">▤</span><strong>No document records yet</strong><p>Register existing Drive folders and track document receipt here.</p><a class="button button-primary button-small" href="{% url 'document-create' %}">Add document</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

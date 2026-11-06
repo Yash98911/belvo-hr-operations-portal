@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Website assets{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">WEBSITE OPERATIONS · TRACKER ONLY</div><h1>Website assets</h1><p class="muted">Track photo and approved image updates without editing the website here.</p></div>
+    <a class="button button-primary" href="{% url 'website-asset-create' %}"><span aria-hidden="true">＋</span> Add asset update</a>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search page, section or owner" aria-label="Search website assets"></div>
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'website-asset-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PAGE / SECTION</th><th>RESPONSIBLE</th><th>REQUESTED</th><th>STATUS</th><th>CURRENT ASSET</th><th>REPLACEMENT</th><th>UPDATED</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ record.section_name|first|upper }}</span><span><strong>{{ record.section_name }}</strong><small>{{ record.notes|default:"No notes" }}</small></span></div></td>
+        <td>{{ record.responsible_person|default:"—" }}</td><td>{{ record.requested_date|date:"d M Y"|default:"—" }}</td>
+        <td><span class="status-chip status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+        <td>{% if record.current_asset_link %}<a class="row-action-link" href="{{ record.current_asset_link }}" target="_blank" rel="noopener noreferrer">Open ↗</a>{% else %}—{% endif %}</td>
+        <td>{% if record.replacement_asset_link %}<a class="row-action-link" href="{{ record.replacement_asset_link }}" target="_blank" rel="noopener noreferrer">Open ↗</a>{% else %}—{% endif %}</td>
+        <td>{{ record.last_updated|date:"d M Y" }}</td><td><a class="row-action-link" href="{% url 'website-asset-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8"><div class="table-empty"><span class="empty-icon">▧</span><strong>No asset updates yet</strong><p>Track photo collection and handoff to the website team here.</p><a class="button button-primary button-small" href="{% url 'website-asset-create' %}">Add asset update</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

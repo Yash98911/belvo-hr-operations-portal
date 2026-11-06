@@ -1,0 +1,34 @@
+{% extends "hr_portal/base.html" %}
+{% load static %}
+{% block title %}Sign in{% endblock %}
+{% block auth_content %}
+<div class="login-layout">
+    <section class="login-brand-panel">
+        <img class="login-logo" src="{% static 'hr_portal/belvo_logo.jpeg' %}" alt="Belvo Ventures Group">
+        <div class="login-tag">INTERNAL HR WORKSPACE</div>
+        <h1>People operations,<br><em>all in one place.</em></h1>
+        <p>A private work console for the Belvo HR team.</p>
+        <div class="login-footnote"><span class="secure-mark">●</span> Authorized HR team members only</div>
+    </section>
+    <section class="login-form-panel">
+        <div class="login-form-wrap">
+            <div class="eyebrow">WELCOME BACK</div>
+            <h2>Sign in to Belvo</h2>
+            <p class="muted">Use your HR workspace account to continue.</p>
+            {% if form.errors %}<div class="form-alert" role="alert">That username and password combination was not recognized. Please try again.</div>{% endif %}
+            {% if next and user.is_authenticated %}<div class="form-alert" role="alert">Your account does not have access to that page.</div>{% endif %}
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <label for="id_username">Username</label>
+                <input class="form-control" type="text" name="username" id="id_username" autocomplete="username" autofocus required>
+                <label for="id_password">Password</label>
+                <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required>
+                <button class="button button-primary button-wide" type="submit">Sign in <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="login-help">Need access? Contact your HR administrator.</p>
+        </div>
+        <div class="login-privacy">Your workspace is private and intended for authorized HR use only.</div>
+    </section>
+</div>
+{% endblock %}

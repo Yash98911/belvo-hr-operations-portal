@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Founding team requests{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">HR COORDINATION</div><h1>Founding team requests</h1><p class="muted">A focused task log for HR support requested by the founding team.</p></div>
+    <a class="button button-primary" href="{% url 'founding-request-create' %}"><span aria-hidden="true">＋</span> New request</a>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search title, requester or owner" aria-label="Search team requests"></div>
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'founding-request-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>REQUEST</th><th>REQUESTER</th><th>HR OWNER</th><th>PRIORITY</th><th>DUE DATE</th><th>STATUS</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ record.title|first|upper }}</span><span><strong>{{ record.title }}</strong><small>{{ record.description|default:"No description" }}</small></span></div></td>
+        <td>{{ record.requester }}</td><td>{{ record.assigned_hr_owner|default:"—" }}</td>
+        <td><span class="status-chip {% if record.priority == 'urgent' or record.priority == 'high' %}status-absent{% elif record.priority == 'low' %}status-completed{% else %}status-waiting{% endif %}">{{ record.get_priority_display }}</span></td>
+        <td>{% if record.due_date %}{% if record.due_date < today and record.status != "completed" %}<span class="overdue-date">Overdue · {{ record.due_date|date:"d M Y" }}</span>{% else %}{{ record.due_date|date:"d M Y" }}{% endif %}{% else %}—{% endif %}</td>
+        <td><span class="status-chip status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+        <td><a class="row-action-link" href="{% url 'founding-request-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="7"><div class="table-empty"><span class="empty-icon">◇</span><strong>No requests yet</strong><p>Record HR support tasks and their follow-ups here.</p><a class="button button-primary button-small" href="{% url 'founding-request-create' %}">New request</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

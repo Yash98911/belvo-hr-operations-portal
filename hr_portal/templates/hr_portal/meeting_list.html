@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Department meetings{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">HR COORDINATION</div><h1>Department meetings</h1><p class="muted">Plan agendas, record notes and follow up on action items.</p></div>
+    <div class="heading-actions"><a class="button button-quiet" href="{% url 'agenda-template-list' %}">Agenda templates</a><a class="button button-primary" href="{% url 'meeting-create' %}"><span aria-hidden="true">＋</span> Schedule meeting</a></div>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search department, host or attendees" aria-label="Search meetings"></div>
+        <input type="month" name="month" value="{{ month }}" class="filter-select month-filter" aria-label="Filter by month">
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or month %}<a class="clear-filter" href="{% url 'meeting-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>DEPARTMENT</th><th>DATE</th><th>TIME</th><th>HOST</th><th>AGENDA</th><th>ACTION ITEMS</th><th>LOCATION</th><th></th></tr></thead>
+    <tbody>{% for meeting in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ meeting.department|first|upper }}</span><span><strong>{{ meeting.department }}</strong><small>{{ meeting.attendees|default:"No attendees listed" }}</small></span></div></td>
+        <td>{% if meeting.date == today %}<span class="status-chip status-approved">Today</span>{% else %}{{ meeting.date|date:"d M Y" }}{% endif %}</td>
+        <td>{{ meeting.time|time:"H:i" }}</td><td>{{ meeting.host }}</td>
+        <td>{{ meeting.agenda|truncatechars:56|default:"—" }}</td><td>{{ meeting.action_items.count }}</td>
+        <td>{% if meeting.meeting_link %}<a class="row-action-link" href="{{ meeting.meeting_link }}" target="_blank" rel="noopener noreferrer">Join ↗</a>{% else %}{{ meeting.meeting_location|default:"—" }}{% endif %}</td>
+        <td><a class="row-action-link" href="{% url 'meeting-detail' meeting.pk %}">Details <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8"><div class="table-empty"><span class="empty-icon">▦</span><strong>No meetings scheduled yet</strong><p>Schedule a department meeting or start with an agenda template.</p><a class="button button-primary button-small" href="{% url 'meeting-create' %}">Schedule meeting</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

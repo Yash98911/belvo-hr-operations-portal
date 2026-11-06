@@ -1,0 +1,28 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}Leave tracker{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">TRACKERS</div><h1>Leave tracker</h1><p class="muted">A shared register of team leave, maintained by HR.</p></div>
+    <div class="heading-actions"><a class="button button-quiet" href="{% url 'leave-export' %}"><span aria-hidden="true">↓</span> Export CSV</a><a class="button button-primary" href="{% url 'leave-create' %}"><span aria-hidden="true">＋</span> Add leave</a></div>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, department or leave type" aria-label="Search leave entries"></div>
+        <input type="month" name="month" value="{{ month }}" class="filter-select month-filter" aria-label="Filter by month">
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status or month %}<a class="clear-filter" href="{% url 'leave-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PERSON</th><th>DEPARTMENT</th><th>LEAVE TYPE</th><th>DATES</th><th>DAYS</th><th>STATUS</th><th>RECORDED BY</th><th></th></tr></thead>
+    <tbody>{% for entry in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-peach">{{ entry.person.full_name|first|upper }}</span><span><strong>{{ entry.person.full_name }}</strong><small>{{ entry.reason|default:"No reason added" }}</small></span></div></td>
+        <td>{{ entry.department }}</td><td>{{ entry.leave_type }}</td>
+        <td>{{ entry.from_date|date:"d M" }} – {{ entry.to_date|date:"d M Y" }}</td>
+        <td>{{ entry.number_of_days }}</td><td><span class="status-chip status-{{ entry.status }}">{{ entry.get_status_display }}</span></td><td>{{ entry.recorded_by.get_username }}</td>
+        <td><a class="row-action-link" href="{% url 'leave-edit' entry.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="8"><div class="table-empty"><span class="empty-icon">◷</span><strong>No leave entries yet</strong><p>Leave recorded by HR will appear here.</p><a class="button button-primary button-small" href="{% url 'leave-create' %}">Add leave</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}

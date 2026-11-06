@@ -1,0 +1,7 @@
+{% if page.has_other_pages %}
+<div class="pagination">
+    <span>Showing page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+    <div>{% if page.has_previous %}<a href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&amp;{% endif %}{% if request.GET.status %}status={{ request.GET.status|urlencode }}&amp;{% endif %}{% if request.GET.month %}month={{ request.GET.month|urlencode }}&amp;{% endif %}page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+    {% if page.has_next %}<a href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&amp;{% endif %}{% if request.GET.status %}status={{ request.GET.status|urlencode }}&amp;{% endif %}{% if request.GET.month %}month={{ request.GET.month|urlencode }}&amp;{% endif %}page={{ page.next_page_number }}">Next →</a>{% endif %}</div>
+</div>
+{% endif %}

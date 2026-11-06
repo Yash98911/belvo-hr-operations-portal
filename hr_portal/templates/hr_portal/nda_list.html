@@ -1,0 +1,29 @@
+{% extends "hr_portal/base.html" %}
+{% block title %}NDA register{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><div class="eyebrow">HR RECORDS · PRIVATE DRIVE LINKS</div><h1>NDA register</h1><p class="muted">Track NDA progress and follow-ups without moving files out of Drive.</p></div>
+    <a class="button button-primary" href="{% url 'nda-create' %}"><span aria-hidden="true">＋</span> Add NDA</a>
+</div>
+<section class="panel table-panel">
+    <form method="get" class="filter-bar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search person, company or HR owner" aria-label="Search NDA records"></div>
+        <select name="status" class="filter-select" aria-label="Filter by status"><option value="">All statuses</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+        <button class="button button-quiet button-small" type="submit">Filter</button>
+        {% if query or status %}<a class="clear-filter" href="{% url 'nda-list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-scroll"><table><thead><tr><th>PERSON / COMPANY</th><th>DEPARTMENT / RELATIONSHIP</th><th>STATUS</th><th>SENT</th><th>SIGNED</th><th>HR OWNER</th><th>FOLLOW-UP</th><th>DRIVE</th><th></th></tr></thead>
+    <tbody>{% for record in records %}
+    <tr>
+        <td><div class="table-person"><span class="person-avatar avatar-lilac">{{ record.person_or_company|first|upper }}</span><span><strong>{{ record.person_or_company }}</strong><small>{{ record.notes|default:"No notes" }}</small></span></div></td>
+        <td>{{ record.department_relationship|default:"—" }}</td>
+        <td><span class="status-chip status-{{ record.status }}">{% if record.follow_up_date and record.follow_up_date < today and record.status != "signed" and record.status != "not_applicable" %}Overdue{% else %}{{ record.get_status_display }}{% endif %}</span></td>
+        <td>{{ record.sent_date|date:"d M Y"|default:"—" }}</td><td>{{ record.signed_date|date:"d M Y"|default:"—" }}</td><td>{{ record.responsible_hr_owner|default:"—" }}</td>
+        <td>{% if record.follow_up_date %}<span class="{% if record.follow_up_date < today and record.status != 'signed' and record.status != 'not_applicable' %}overdue-date{% endif %}">{{ record.follow_up_date|date:"d M Y" }}</span>{% else %}—{% endif %}</td>
+        <td>{% if record.drive_link %}<a class="row-action-link" href="{{ record.drive_link }}" target="_blank" rel="noopener noreferrer">Open Drive ↗</a>{% else %}<span class="muted">No link</span>{% endif %}</td>
+        <td><a class="row-action-link" href="{% url 'nda-edit' record.pk %}">Edit <span>↗</span></a></td>
+    </tr>
+    {% empty %}<tr><td colspan="9"><div class="table-empty"><span class="empty-icon">◇</span><strong>No NDA records yet</strong><p>Track sent, signed and follow-up NDAs here.</p><a class="button button-primary button-small" href="{% url 'nda-create' %}">Add NDA</a></div></td></tr>{% endfor %}</tbody></table></div>
+    {% include "hr_portal/pagination.html" with page=records %}
+</section>
+{% endblock %}
